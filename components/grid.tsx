@@ -1,13 +1,19 @@
+'use client'
+
 import React from 'react'
-import Row from './row'
+import Tile from './tile'
+import useCheckGameState from '@/hooks/use-check-game-state'
 
 export default function Grid() {
-  const rows = [1, 2, 3] // want to create a 3 x 3 grid
+  const tiles = [1, 2, 3, 4, 5, 6, 7, 8, 9] // 3 x 3 grid
+
+  // hook for handling game state checking
+  useCheckGameState()
 
   return (
-    <div className="flex">
-      {rows.map((row) => (
-        <Row key={row} />
+    <div className="grid grid-cols-3">
+      {tiles.map((tile) => (
+        <Tile key={tile} tileId={tile} />
       ))}
     </div>
   )
