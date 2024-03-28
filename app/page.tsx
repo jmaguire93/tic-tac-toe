@@ -9,7 +9,7 @@ export default function Home() {
 
   return (
     <main className="flex flex-1 justify-center items-center">
-      <div className="">
+      <div>
         <RestartButton />
         <div className="font-semibold">
           Player 1: X <br /> Player 2: O
