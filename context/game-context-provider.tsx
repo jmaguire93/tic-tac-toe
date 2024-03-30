@@ -16,6 +16,8 @@ type GameContextType = {
   setWinningCombination: React.Dispatch<
     React.SetStateAction<Combination | null>
   >
+  currentTile: number | null
+  setCurrentTile: React.Dispatch<React.SetStateAction<number | null>>
 }
 
 type GameContextProviderProps = {
@@ -43,6 +45,7 @@ export default function GameContextProvider({
   const [message, setMessage] = useState<string>('')
   const [winningCombination, setWinningCombination] =
     useState<Combination | null>(null)
+  const [currentTile, setCurrentTile] = useState<number | null>(null)
 
   return (
     <GameContext.Provider
@@ -56,7 +59,9 @@ export default function GameContextProvider({
         message,
         setMessage,
         winningCombination,
-        setWinningCombination
+        setWinningCombination,
+        currentTile,
+        setCurrentTile
       }}
     >
       {children}
