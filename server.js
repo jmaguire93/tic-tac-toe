@@ -44,7 +44,12 @@ app.prepare().then(() => {
     connections[playerIndex] = socket
 
     // Tell everyone else what player number just connected
-    socket.broadcast.emit('player-connect', playerIndex)
+    socket.broadcast.emit('player-connect', playerIndex, hasOpponent)
+
+    socket.on('start-game', () => {
+      // Tell the opponent the game has started
+      socket.broadcast.emit('game-started')
+    })
 
     socket.on('updateCurrentTile', (tileId) => {
       // Broadcast the updated currentTile to all connected clients

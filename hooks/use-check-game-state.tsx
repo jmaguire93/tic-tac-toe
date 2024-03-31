@@ -9,7 +9,7 @@ export default function useOnSelection() {
   const {
     isPlayerX,
     gameState,
-    setIsFinished,
+    setHasFinished,
     setMessage,
     setWinningCombination
   } = useGameContextProvider()
@@ -24,7 +24,7 @@ export default function useOnSelection() {
     for (const combination of winningCombinations()) {
       if (checkCombinationMatch(combination)) {
         setWinningCombination(combination)
-        setIsFinished(true)
+        setHasFinished(true)
         setMessage(
           `Congrats ${isPlayerX ? 'Player 2' : 'Player 1'}, you are victorious!`
         )
@@ -34,14 +34,14 @@ export default function useOnSelection() {
 
     // Check if there are still any empty tiles left
     if (!Object.values(gameState).includes('')) {
-      setIsFinished(true)
+      setHasFinished(true)
       setMessage(`It's a draw! The game ends in a tie. Try again for victory!`)
       return
     }
 
-    setIsFinished(false)
+    setHasFinished(false)
     setMessage('')
-  }, [gameState, isPlayerX, setIsFinished, setMessage, setWinningCombination])
+  }, [gameState, isPlayerX, setHasFinished, setMessage, setWinningCombination])
 
   useEffect(() => {
     checkGameState()

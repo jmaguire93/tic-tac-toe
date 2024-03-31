@@ -8,8 +8,12 @@ type GameContextType = {
   setIsPlayerX: React.Dispatch<React.SetStateAction<boolean>>
   gameState: GameState
   setGameState: React.Dispatch<React.SetStateAction<GameState>>
-  isFinished: boolean
-  setIsFinished: React.Dispatch<React.SetStateAction<boolean>>
+  hasStarted: boolean
+  setHasStarted: React.Dispatch<React.SetStateAction<boolean>>
+  hasFinished: boolean
+  setHasFinished: React.Dispatch<React.SetStateAction<boolean>>
+  readyToStart: boolean
+  setReadyToStart: React.Dispatch<React.SetStateAction<boolean>>
   message: string
   setMessage: React.Dispatch<React.SetStateAction<string>>
   winningCombination: Combination | null
@@ -41,7 +45,9 @@ export default function GameContextProvider({
     8: '',
     9: ''
   })
-  const [isFinished, setIsFinished] = useState<boolean>(false)
+  const [hasStarted, setHasStarted] = useState<boolean>(false)
+  const [hasFinished, setHasFinished] = useState<boolean>(false)
+  const [readyToStart, setReadyToStart] = useState<boolean>(false)
   const [message, setMessage] = useState<string>('')
   const [winningCombination, setWinningCombination] =
     useState<Combination | null>(null)
@@ -54,14 +60,18 @@ export default function GameContextProvider({
         setIsPlayerX,
         gameState,
         setGameState,
-        isFinished,
-        setIsFinished,
+        hasStarted,
+        setHasStarted,
+        hasFinished,
+        setHasFinished,
         message,
         setMessage,
         winningCombination,
         setWinningCombination,
         currentTile,
-        setCurrentTile
+        setCurrentTile,
+        readyToStart,
+        setReadyToStart
       }}
     >
       {children}

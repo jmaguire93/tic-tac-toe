@@ -16,16 +16,17 @@ export default function Tile({ tileId }: TileProps) {
     setIsPlayerX,
     gameState,
     setGameState,
-    isFinished,
+    hasFinished,
     winningCombination,
     currentTile,
-    setCurrentTile
+    setCurrentTile,
+    hasStarted
   } = useGameContextProvider()
   const tile = tileId as keyof GameState
   const winningTile =
-    winningCombination && winningCombination.includes(tile) && isFinished
+    winningCombination && winningCombination.includes(tile) && hasFinished
   const handleTileClick = () => {
-    if (letter || isFinished) return // tile has already been selected
+    if (letter || !hasStarted || hasFinished) return // tile has already been selected
 
     const selection = isPlayerX ? 'x' : 'o'
     setCurrentTile(tileId)
