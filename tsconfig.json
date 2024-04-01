@@ -26,7 +26,8 @@
     "**/*.ts",
     "**/*.tsx",
     ".next/types/**/*.ts",
-    "server.js"
+    "server.js",
+    "data/index.js"
   ],
   "exclude": ["node_modules"]
 }

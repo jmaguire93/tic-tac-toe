@@ -5,7 +5,8 @@ import { socket } from '@/socket'
 import React from 'react'
 
 export default function StartButton() {
-  const { readyToStart, setHasStarted } = useGameContextProvider()
+  const { readyToStart, setHasStarted, playerId, currentId } =
+    useGameContextProvider()
 
   const handleStartClick = () => {
     setHasStarted(true)

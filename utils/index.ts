@@ -22,3 +22,7 @@ export function winningCombinations() {
     [1, 5, 9]
   ] as Combination[]
 }
+
+export function compareObjects(objOne: GameState, objTwo: GameState) {
+  return JSON.stringify(objOne) === JSON.stringify(objTwo)
+}

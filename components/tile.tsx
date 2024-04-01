@@ -20,13 +20,16 @@ export default function Tile({ tileId }: TileProps) {
     winningCombination,
     currentTile,
     setCurrentTile,
-    hasStarted
+    hasStarted,
+    playerId,
+    currentId,
+    setCurrentId
   } = useGameContextProvider()
   const tile = tileId as keyof GameState
   const winningTile =
     winningCombination && winningCombination.includes(tile) && hasFinished
   const handleTileClick = () => {
-    if (letter || !hasStarted || hasFinished) return // tile has already been selected
+    if (letter || !hasStarted || hasFinished || currentId !== playerId) return // tile has already been selected
 
     const selection = isPlayerX ? 'x' : 'o'
     setCurrentTile(tileId)
@@ -38,14 +41,22 @@ export default function Tile({ tileId }: TileProps) {
   useEffect(() => {
     const handleTileSelect = (data: Letter) => {
       if (tileId === currentTile) {
-        setLetter(data)
-        setIsPlayerX(!isPlayerX)
-        setGameState({
+        const updatedGameState = {
           ...gameState,
           [tileId]: isPlayerX ? 'x' : 'o'
-        })
+        }
+
+        setLetter(data)
+        setIsPlayerX(!isPlayerX)
+        setCurrentId(isPlayerX ? 2 : 1)
+        setGameState(updatedGameState)
+        // save updated gamestate on the server
+        socket.emit('on-player-move', updatedGameState, !isPlayerX)
       }
     }
+
+    // ensure existing letters are persisted for each tile
+    setLetter(gameState[tileId as keyof GameState])
 
     socket.on('tileSelect', handleTileSelect)
 
@@ -53,7 +64,15 @@ export default function Tile({ tileId }: TileProps) {
     return () => {
       socket.off('tileSelect', handleTileSelect)
     }
-  }, [currentTile, gameState, isPlayerX, setGameState, setIsPlayerX, tileId])
+  }, [
+    currentTile,
+    gameState,
+    isPlayerX,
+    setCurrentId,
+    setGameState,
+    setIsPlayerX,
+    tileId
+  ])
 
   useEffect(() => {
     socket.on('currentTileUpdate', (updatedTileId) => {
@@ -71,7 +90,7 @@ export default function Tile({ tileId }: TileProps) {
       onClick={handleTileClick}
       className={`${
         winningTile ? 'bg-green-200' : ''
-      } flex justify-center items-center p-4 h-24 w-24 border-black border-2 text-4xl capitalize cursor-pointer`}
+      } hover:bg-gray-200 flex justify-center items-center p-4 h-24 w-24 border-black border-2 text-4xl capitalize cursor-pointer`}
     >
       {letter}
     </div>

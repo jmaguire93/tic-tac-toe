@@ -6,15 +6,30 @@ import { useGameContextProvider } from '@/context/game-context-provider'
 import { useEffect, useState } from 'react'
 import { socket } from '../socket'
 import StartButton from '@/components/start-button'
+import React from 'react'
+import { GameState } from '@/types'
+import { compareObjects } from '@/utils'
 
 export default function Home() {
-  const { message, hasStarted, setReadyToStart, setHasStarted } =
-    useGameContextProvider()
+  const {
+    isPlayerX,
+    setIsPlayerX,
+    message,
+    hasStarted,
+    setReadyToStart,
+    setHasStarted,
+    playerId,
+    setPlayerId,
+    opponentId,
+    setOpponentId,
+    currentId,
+    setCurrentId,
+    gameState,
+    setGameState
+  } = useGameContextProvider()
 
   const [isConnected, setIsConnected] = useState(false)
   const [transport, setTransport] = useState('N/A')
-  const [playerNumber, setPlayerNumber] = useState<string | null>(null)
-  const [opponentNumber, setOpponentNumber] = useState<string | null>(null)
   const [gameFull, setGameFull] = useState<boolean>(false)
 
   useEffect(() => {
@@ -46,24 +61,31 @@ export default function Home() {
   }, [])
 
   useEffect(() => {
-    function onPlayerNumberSelect(player: string, hasOpponent: boolean) {
-      setPlayerNumber(player)
+    function onPlayerNumberSelect(player: number, hasOpponent: boolean) {
+      setPlayerId(player)
+
+      setCurrentId(isPlayerX ? 1 : 2)
+
+      // if first player, make the current player when they connect
+      if (player === 1) {
+        setCurrentId(player)
+      }
 
       if (hasOpponent) {
-        setOpponentNumber(player === '1' ? '0' : '1')
+        setOpponentId(player === 1 ? 2 : 1)
       }
 
       setReadyToStart(hasOpponent)
     }
 
-    function onPlayerConnectSelect(opponent: string, hasOpponent: boolean) {
+    function onPlayerConnectSelect(opponent: number, hasOpponent: boolean) {
       if (gameFull) return
-      setOpponentNumber(opponent)
+      setOpponentId(opponent)
       setReadyToStart(hasOpponent)
     }
 
     function onPlayerDisconnectSelect() {
-      setOpponentNumber(null)
+      setOpponentId(null)
       setReadyToStart(false)
     }
 
@@ -71,49 +93,113 @@ export default function Home() {
       setHasStarted(true)
     }
 
+    function onGameRestarted() {
+      window.location.reload()
+    }
+
     function onGameFull() {
       setGameFull(true)
+    }
+
+    function onRestoreGameState(
+      restoredGameState: GameState,
+      restoredHasStarted: boolean,
+      restoredIsPlayerX: boolean,
+      restoredCurrentId: number
+    ) {
+      if (!compareObjects(restoredGameState, gameState)) {
+        setGameState(restoredGameState)
+      }
+
+      if (hasStarted !== restoredHasStarted) {
+        setHasStarted(restoredHasStarted)
+      }
+
+      if (isPlayerX !== restoredIsPlayerX) {
+        setIsPlayerX(restoredIsPlayerX)
+      }
+
+      if (currentId !== restoredCurrentId) {
+        setCurrentId(restoredCurrentId)
+      }
     }
 
     socket.on('player-number', onPlayerNumberSelect)
     socket.on('player-connect', onPlayerConnectSelect)
     socket.on('player-disconnect', onPlayerDisconnectSelect)
     socket.on('game-started', onGameStarted)
+    socket.on('game-restarted', onGameRestarted)
     socket.on('game-full', onGameFull)
+    socket.on('restore-game-state', onRestoreGameState)
 
     return () => {
       socket.off('player-number', onPlayerNumberSelect)
       socket.off('player-connect', onPlayerConnectSelect)
       socket.off('player-disconnect', onPlayerDisconnectSelect)
       socket.off('game-started', onGameStarted)
+      socket.off('game-restarted', onGameRestarted)
       socket.off('game-full', onGameFull)
+      socket.off('restore-game-state', onRestoreGameState)
     }
-  }, [gameFull, setHasStarted, setReadyToStart])
+  }, [
+    currentId,
+    gameFull,
+    gameState,
+    hasStarted,
+    isPlayerX,
+    setCurrentId,
+    setGameState,
+    setHasStarted,
+    setOpponentId,
+    setPlayerId,
+    setReadyToStart
+  ])
 
   return (
     <main className="flex flex-1 justify-center items-center">
       {/* <p>Transport: {transport}</p> */}
       <div>
-        <p className="text-center capitalize">
+        {/* <p className="text-center capitalize">
           Status: {isConnected ? 'connected' : 'disconnected'}
-        </p>
-        {hasStarted ? <RestartButton /> : <StartButton />}
-        <div className="font-semibold">
+        </p> */}
+        {hasStarted ? (
+          <>
+            <RestartButton />
+            <div className="text-center">
+              {currentId === playerId ? (
+                <div className="font-semibold">Your turn!</div>
+              ) : (
+                <div>{`Opponent's turn!`}</div>
+              )}
+            </div>
+          </>
+        ) : (
+          <StartButton />
+        )}
+        <div className="text-center">
           {gameFull ? <div>Game is full.</div> : null}
-          {playerNumber ? (
-            <>
-              Player {playerNumber} (You): {playerNumber === '0' ? 'X' : 'O'}
-              <br />
-            </>
-          ) : null}
-          {opponentNumber ? (
-            <>
-              Player {opponentNumber} (Opponent):{' '}
-              {opponentNumber === '0' ? 'X' : 'O'}
-            </>
-          ) : (
-            <>Waiting for opponent...</>
-          )}
+          <div className="flex justify-between text-sm">
+            {playerId ? (
+              <div
+                className={`${
+                  currentId === playerId ? 'font-bold' : ''
+                } inline`}
+              >
+                Player {playerId} ({playerId === 1 ? 'X' : 'O'})
+              </div>
+            ) : null}
+            {opponentId ? (
+              <div
+                className={`${
+                  currentId !== playerId ? 'font-bold' : ''
+                } inline`}
+              >
+                Player {opponentId} ({opponentId === 1 ? 'X' : 'O'})
+              </div>
+            ) : (
+              <>Waiting for opponent...</>
+            )}
+          </div>
         </div>
         <div className="flex items-center justify-center">
           <Grid />

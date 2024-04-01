@@ -1,7 +1,11 @@
 const { createServer } = require('node:http')
 const next = require('next')
 const { Server } = require('socket.io')
-const { connect } = require('http2')
+// const { connect } = require('http2')
+// const { gameState } = require('@/data')
+// const { gameState, hasStarted } = require('./data')
+
+// import { gameState } from './data'
 
 const dev = process.env.NODE_ENV !== 'production'
 const hostname = 'localhost'
@@ -9,6 +13,22 @@ const port = 3000
 // when using middleware `hostname` and `port` must be provided below
 const app = next({ dev, hostname, port })
 const handler = app.getRequestHandler()
+
+// game starting defaults
+let gameState = {
+  1: '',
+  2: '',
+  3: '',
+  4: '',
+  5: '',
+  6: '',
+  7: '',
+  8: '',
+  9: ''
+}
+let hasStarted = false
+let currentId = null
+let isPlayerX = true
 
 app.prepare().then(() => {
   const httpServer = createServer(handler)
@@ -22,7 +42,7 @@ app.prepare().then(() => {
 
     for (var i in connections) {
       if (connections[i] === null) {
-        playerIndex = i
+        playerIndex = parseInt(i)
         break
       }
     }
@@ -35,25 +55,59 @@ app.prepare().then(() => {
 
     console.log(`Player ${playerIndex} Connected`)
 
-    const hasOpponent =
-      playerIndex === '0' ? !!connections[1] : !!connections[0]
+    const hasOpponent = playerIndex === 0 ? !!connections[1] : !!connections[0]
 
     // Tell the connecting client what player number they are
-    socket.emit('player-number', playerIndex, hasOpponent)
+    socket.emit('player-number', playerIndex + 1, hasOpponent)
+    // When a player reconnects, send them the latest game state stored on the server
+    socket.emit(
+      'restore-game-state',
+      gameState,
+      hasStarted,
+      isPlayerX,
+      currentId
+    )
 
     connections[playerIndex] = socket
 
     // Tell everyone else what player number just connected
-    socket.broadcast.emit('player-connect', playerIndex, hasOpponent)
+    socket.broadcast.emit('player-connect', playerIndex + 1, hasOpponent)
 
     socket.on('start-game', () => {
       // Tell the opponent the game has started
       socket.broadcast.emit('game-started')
+      hasStarted = true
+    })
+
+    // Listen for the event to update and store the game state on the server
+    socket.on('on-player-move', (updatedGameState, updatedIsPlayerX) => {
+      gameState = updatedGameState
+      currentId = updatedIsPlayerX ? 1 : 2
+      isPlayerX = updatedIsPlayerX
+    })
+
+    socket.on('restart-game', () => {
+      // Tell the opponent the game has restarted
+      socket.broadcast.emit('game-restarted')
+
+      gameState = {
+        1: '',
+        2: '',
+        3: '',
+        4: '',
+        5: '',
+        6: '',
+        7: '',
+        8: '',
+        9: ''
+      }
+      hasStarted = false
+      currentPlayer = 1
     })
 
     socket.on('updateCurrentTile', (tileId) => {
       // Broadcast the updated currentTile to all connected clients
-      io.emit('currentTileUpdate', tileId)
+      socket.broadcast.emit('currentTileUpdate', tileId)
     })
 
     socket.on('tileSelect', (value) => {
@@ -64,8 +118,8 @@ app.prepare().then(() => {
       console.log(`Player ${playerIndex} Disconnected`)
       connections[playerIndex] = null
 
-      // tell everyone else which player has disconnected
-      socket.broadcast.emit('player-disconnect', playerIndex)
+      // Tell everyone else which player has disconnected
+      socket.broadcast.emit('player-disconnect')
     })
   })
 
