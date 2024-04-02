@@ -4,6 +4,7 @@ import './globals.css'
 import Header from '@/components/header'
 import Footer from '@/components/footer'
 import GameContextProvider from '@/context/game-context-provider'
+import SocketContextProvider from '@/context/socket-context-provider'
 
 const inter = Inter({ subsets: ['latin'] })
 
@@ -20,11 +21,13 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className={`${inter.className} flex flex-col min-h-screen`}>
-        <GameContextProvider>
-          <Header />
-          {children}
-          <Footer />
-        </GameContextProvider>
+        <SocketContextProvider>
+          <GameContextProvider>
+            <Header />
+            {children}
+            <Footer />
+          </GameContextProvider>
+        </SocketContextProvider>
       </body>
     </html>
   )

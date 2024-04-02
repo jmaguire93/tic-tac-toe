@@ -9,6 +9,7 @@ import StartButton from '@/components/start-button'
 import React from 'react'
 import { GameState } from '@/types'
 import { compareObjects } from '@/utils'
+import { useSocketContextProvider } from '@/context/socket-context-provider'
 
 export default function Home() {
   const {
@@ -31,37 +32,8 @@ export default function Home() {
     setWinningCombination
   } = useGameContextProvider()
 
-  const [isConnected, setIsConnected] = useState(false)
-  const [transport, setTransport] = useState('N/A')
+  const { isConnected } = useSocketContextProvider()
   const [gameFull, setGameFull] = useState<boolean>(false)
-
-  useEffect(() => {
-    if (socket.connected) {
-      onConnect()
-    }
-
-    function onConnect() {
-      setIsConnected(true)
-      setTransport(socket.io.engine.transport.name)
-
-      socket.io.engine.on('upgrade', (transport) => {
-        setTransport(transport.name)
-      })
-    }
-
-    function onDisconnect() {
-      setIsConnected(false)
-      setTransport('N/A')
-    }
-
-    socket.on('connect', onConnect)
-    socket.on('disconnect', onDisconnect)
-
-    return () => {
-      socket.off('connect', onConnect)
-      socket.off('disconnect', onDisconnect)
-    }
-  }, [])
 
   useEffect(() => {
     function onPlayerNumberSelect(
@@ -160,64 +132,65 @@ export default function Home() {
   ])
 
   return (
-    <main className="flex flex-1 justify-center items-center">
-      {/* <p>Transport: {transport}</p> */}
-      <div className="relative">
-        {/* <p className="text-center capitalize">
-          Status: {isConnected ? 'connected' : 'disconnected'}
-        </p> */}
-        {hasStarted ? (
-          <>
-            <RestartButton />
-            {!hasFinished ? (
-              <div className="text-center">
-                {currentId === playerId ? (
-                  <div className="font-semibold">Your turn!</div>
-                ) : (
-                  <div>{`Opponent's turn!`}</div>
-                )}
-              </div>
-            ) : null}
-          </>
-        ) : (
-          <StartButton />
-        )}
-        <div className="text-center">
-          {gameFull ? <div>Game is full.</div> : null}
-          {isConnected ? (
-            <div className="flex justify-between text-sm">
-              {playerId ? (
-                <div
-                  className={`${
-                    currentId === playerId ? 'font-bold' : ''
-                  } inline`}
-                >
-                  Player {playerId} ({playerId === 1 ? 'X' : 'O'})
+    <>
+      <p className="text-sm text-right capitalize px-2">
+        Status: {isConnected ? 'connected' : 'disconnected'}
+      </p>
+      <main className="flex flex-1 justify-center items-center">
+        <div className="relative">
+          {hasStarted && !gameFull ? (
+            <>
+              <RestartButton />
+              {!hasFinished ? (
+                <div className="text-center font-semibold">
+                  {currentId === playerId ? (
+                    <div>Your turn!</div>
+                  ) : (
+                    <div>{`Opponent's turn!`}</div>
+                  )}
                 </div>
               ) : null}
-              {opponentId ? (
-                <div
-                  className={`${
-                    currentId !== playerId ? 'font-bold' : ''
-                  } inline`}
-                >
-                  Player {opponentId} ({opponentId === 1 ? 'X' : 'O'})
-                </div>
-              ) : (
-                <>Waiting for opponent...</>
-              )}
-            </div>
+            </>
           ) : (
-            <div>Connecting...</div>
+            <StartButton />
           )}
+          <div className="text-center">
+            {gameFull ? <div>Game is full.</div> : null}
+            {isConnected ? (
+              <div className="flex justify-between text-sm">
+                {playerId ? (
+                  <div
+                    className={`${
+                      currentId === playerId ? 'font-bold' : ''
+                    } inline`}
+                  >
+                    Player {playerId} ({playerId === 1 ? 'X' : 'O'})
+                  </div>
+                ) : null}
+                {opponentId ? (
+                  <div
+                    className={`${
+                      currentId !== playerId ? 'font-bold' : ''
+                    } inline`}
+                  >
+                    Player {opponentId} ({opponentId === 1 ? 'X' : 'O'})
+                  </div>
+                ) : (
+                  <>{!gameFull ? 'Waiting for opponent...' : null}</>
+                )}
+              </div>
+            ) : (
+              <div className="text-sm">Connecting...</div>
+            )}
+          </div>
+          <div className="flex items-center justify-center">
+            <Grid />
+          </div>
+          <div className="absolute left-0 right-0 mx-auto text-center">
+            {message}
+          </div>
         </div>
-        <div className="flex items-center justify-center">
-          <Grid />
-        </div>
-        <div className="absolute left-0 right-0 mx-auto text-center">
-          {message}
-        </div>
-      </div>
-    </main>
+      </main>
+    </>
   )
 }
