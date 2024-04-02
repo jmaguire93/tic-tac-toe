@@ -1,6 +1,6 @@
 # Tic-Tac-Toe
 
-This Next.js app uses a custmer Socket.IO server that allows the game the multiplayer game to be played across different screens.
+This Next.js app uses a custom Socket.IO server for realtime updates that allows the game to be played with 2 players across different screens.
 
 ## Getting Started
 
