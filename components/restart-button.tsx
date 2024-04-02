@@ -21,7 +21,7 @@ export default function RestartButton() {
           !hasFinished ? 'opacity-70' : ''
         } text-white rounded py-2 px-4`}
       >
-        Restart
+        Rematch
       </button>
     </div>
   )

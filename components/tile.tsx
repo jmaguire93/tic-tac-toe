@@ -88,9 +88,9 @@ export default function Tile({ tileId }: TileProps) {
   return (
     <div
       onClick={handleTileClick}
-      className={`${
-        winningTile ? 'bg-green-200' : ''
-      } hover:bg-gray-100 flex justify-center items-center p-4 h-24 w-24 border-black border-2 text-4xl capitalize cursor-pointer`}
+      className={`${winningTile ? 'bg-green-200' : ''} ${
+        !hasFinished ? 'hover:bg-gray-100' : ''
+      } flex justify-center items-center p-4 h-24 w-24 border-black border-4 text-4xl capitalize cursor-pointer`}
     >
       {letter}
     </div>

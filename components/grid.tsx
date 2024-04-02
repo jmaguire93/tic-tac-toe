@@ -11,7 +11,7 @@ export default function Grid() {
   useCheckGameState()
 
   return (
-    <div className="grid grid-cols-3">
+    <div className="grid grid-cols-3 gap-1">
       {tiles.map((tile) => (
         <Tile key={tile} tileId={tile} />
       ))}

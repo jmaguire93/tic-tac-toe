@@ -162,7 +162,7 @@ export default function Home() {
   return (
     <main className="flex flex-1 justify-center items-center">
       {/* <p>Transport: {transport}</p> */}
-      <div>
+      <div className="relative">
         {/* <p className="text-center capitalize">
           Status: {isConnected ? 'connected' : 'disconnected'}
         </p> */}
@@ -214,7 +214,9 @@ export default function Home() {
         <div className="flex items-center justify-center">
           <Grid />
         </div>
-        <div>{message}</div>
+        <div className="absolute left-0 right-0 mx-auto text-center">
+          {message}
+        </div>
       </div>
     </main>
   )

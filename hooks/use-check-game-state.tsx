@@ -11,7 +11,9 @@ export default function useOnSelection() {
     gameState,
     setHasFinished,
     setMessage,
-    setWinningCombination
+    setWinningCombination,
+    currentId,
+    playerId
   } = useGameContextProvider()
 
   const checkGameState = useCallback(() => {
@@ -25,9 +27,7 @@ export default function useOnSelection() {
       if (checkCombinationMatch(combination)) {
         setWinningCombination(combination)
         setHasFinished(true)
-        setMessage(
-          `Congrats ${isPlayerX ? 'Player 2' : 'Player 1'}, you are victorious!`
-        )
+        setMessage(`${isPlayerX ? 'Player 2' : 'Player 1'} wins!`)
         return
       }
     }
@@ -35,7 +35,7 @@ export default function useOnSelection() {
     // Check if there are still any empty tiles left
     if (!Object.values(gameState).includes('')) {
       setHasFinished(true)
-      setMessage(`It's a draw! The game ends in a tie. Try again for victory!`)
+      setMessage(`It's a draw! Try again for victory!`)
       return
     }
 
