@@ -43,7 +43,7 @@ app.prepare().then(() => {
 
     // Alert any other players trying to join that the game is full
     if (playerIndex === -1) {
-      socket.emit('game-full')
+      socket.emit('gameFull')
       return
     }
 
@@ -51,36 +51,30 @@ app.prepare().then(() => {
 
     const hasOpponent = playerIndex === 0 ? !!connections[1] : !!connections[0]
 
-    // Tell the connecting client what player number they are
-    socket.emit('player-number', playerIndex + 1, hasOpponent, isPlayerX)
+    // Setup player events for the connecting client
+    socket.emit('playerEvents', playerIndex + 1, hasOpponent, isPlayerX)
     // Ensure player has the latest game state stored on the server
-    socket.emit(
-      'restore-game-state',
-      gameState,
-      hasStarted,
-      isPlayerX,
-      currentId
-    )
+    socket.emit('restoreGameState', gameState, hasStarted)
 
     connections[playerIndex] = socket
 
     // Tell everyone else what player number just connected
-    socket.broadcast.emit('player-connect', playerIndex + 1, hasOpponent)
+    socket.broadcast.emit('playerConnect', playerIndex + 1, hasOpponent)
 
-    socket.on('start-game', () => {
+    socket.on('startGame', () => {
       // Tell the opponent the game has started
-      socket.broadcast.emit('game-started')
+      socket.broadcast.emit('gameStarted')
       hasStarted = true
     })
 
     // Listen for the event to update and store the game state on the server
-    socket.on('on-player-move', (updatedGameState, updatedIsPlayerX) => {
+    socket.on('onPlayerMove', (updatedGameState, updatedIsPlayerX) => {
       gameState = updatedGameState
       currentId = updatedIsPlayerX ? 1 : 2
       isPlayerX = updatedIsPlayerX
     })
 
-    socket.on('restart-game', () => {
+    socket.on('restartGame', () => {
       gameState = {
         1: '',
         2: '',
@@ -96,7 +90,7 @@ app.prepare().then(() => {
       currentId = null
       isPlayerX = true
 
-      io.emit('game-restarted', gameState)
+      io.emit('gameRestarted', gameState)
     })
 
     socket.on('updateCurrentTile', (tileId) => {
@@ -113,7 +107,7 @@ app.prepare().then(() => {
       connections[playerIndex] = null
 
       // Tell everyone else which player has disconnected
-      socket.broadcast.emit('player-disconnect')
+      socket.broadcast.emit('playerDisconnect')
     })
   })
 

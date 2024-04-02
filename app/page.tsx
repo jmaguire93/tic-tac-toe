@@ -36,13 +36,17 @@ export default function Home() {
   const [gameFull, setGameFull] = useState<boolean>(false)
 
   useEffect(() => {
-    function onPlayerNumberSelect(
+    const handlePlayerEvents = (
       player: number,
       hasOpponent: boolean,
       restoredIsPlayerX: boolean
-    ) {
+    ) => {
       setPlayerId(player)
       setCurrentId(restoredIsPlayerX ? 1 : 2)
+
+      if (isPlayerX !== restoredIsPlayerX) {
+        setIsPlayerX(restoredIsPlayerX)
+      }
 
       if (hasOpponent) {
         setOpponentId(player === 1 ? 2 : 1)
@@ -51,22 +55,22 @@ export default function Home() {
       setReadyToStart(hasOpponent)
     }
 
-    function onPlayerConnectSelect(opponent: number, hasOpponent: boolean) {
+    const handlePlayerConnect = (opponent: number, hasOpponent: boolean) => {
       if (gameFull) return
       setOpponentId(opponent)
       setReadyToStart(hasOpponent)
     }
 
-    function onPlayerDisconnectSelect() {
+    const handlePlayerDisconnect = () => {
       setOpponentId(null)
       setReadyToStart(false)
     }
 
-    function onGameStarted() {
+    const handleGameStarted = () => {
       setHasStarted(true)
     }
 
-    function onGameRestarted(initialGameState: GameState) {
+    const handleGameRestarted = (initialGameState: GameState) => {
       setGameState(initialGameState)
       setHasStarted(false)
       setHasFinished(false)
@@ -75,15 +79,14 @@ export default function Home() {
       setWinningCombination(null)
     }
 
-    function onGameFull() {
+    const handleGameFull = () => {
       setGameFull(true)
     }
 
-    function onRestoreGameState(
+    const handleRestoreGameState = (
       restoredGameState: GameState,
-      restoredHasStarted: boolean,
-      restoredIsPlayerX: boolean
-    ) {
+      restoredHasStarted: boolean
+    ) => {
       if (!compareObjects(restoredGameState, gameState)) {
         setGameState(restoredGameState)
       }
@@ -91,28 +94,24 @@ export default function Home() {
       if (hasStarted !== restoredHasStarted) {
         setHasStarted(restoredHasStarted)
       }
-
-      if (isPlayerX !== restoredIsPlayerX) {
-        setIsPlayerX(restoredIsPlayerX)
-      }
     }
 
-    socket.on('player-number', onPlayerNumberSelect)
-    socket.on('player-connect', onPlayerConnectSelect)
-    socket.on('player-disconnect', onPlayerDisconnectSelect)
-    socket.on('game-started', onGameStarted)
-    socket.on('game-restarted', onGameRestarted)
-    socket.on('game-full', onGameFull)
-    socket.on('restore-game-state', onRestoreGameState)
+    socket.on('playerEvents', handlePlayerEvents)
+    socket.on('playerConnect', handlePlayerConnect)
+    socket.on('playerDisconnect', handlePlayerDisconnect)
+    socket.on('gameStarted', handleGameStarted)
+    socket.on('gameRestarted', handleGameRestarted)
+    socket.on('gameFull', handleGameFull)
+    socket.on('restoreGameState', handleRestoreGameState)
 
     return () => {
-      socket.off('player-number', onPlayerNumberSelect)
-      socket.off('player-connect', onPlayerConnectSelect)
-      socket.off('player-disconnect', onPlayerDisconnectSelect)
-      socket.off('game-started', onGameStarted)
-      socket.off('game-restarted', onGameRestarted)
-      socket.off('game-full', onGameFull)
-      socket.off('restore-game-state', onRestoreGameState)
+      socket.off('playerEvents', handlePlayerEvents)
+      socket.off('playerConnect', handlePlayerConnect)
+      socket.off('playerDisconnect', handlePlayerDisconnect)
+      socket.off('gameStarted', handleGameStarted)
+      socket.off('gameRestarted', handleGameRestarted)
+      socket.off('gameFull', handleGameFull)
+      socket.off('restoreGameState', handleRestoreGameState)
     }
   }, [
     currentId,

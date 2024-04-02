@@ -12,7 +12,7 @@ export default function StartButton() {
     setHasStarted(true)
 
     // send socket event to let other players know the game has started
-    socket.emit('start-game')
+    socket.emit('startGame')
   }
 
   return (

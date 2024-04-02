@@ -9,7 +9,7 @@ export default function RestartButton() {
 
   const handleRestartClick = () => {
     // send socket event to let other players know the game has started
-    socket.emit('restart-game')
+    socket.emit('restartGame')
   }
 
   return (

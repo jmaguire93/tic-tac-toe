@@ -51,7 +51,7 @@ export default function Tile({ tileId }: TileProps) {
         setCurrentId(isPlayerX ? 2 : 1)
         setGameState(updatedGameState)
         // save updated gamestate on the server
-        socket.emit('on-player-move', updatedGameState, !isPlayerX)
+        socket.emit('onPlayerMove', updatedGameState, !isPlayerX)
       }
     }
 
