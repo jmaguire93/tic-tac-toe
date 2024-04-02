@@ -24,7 +24,7 @@ export default function StartButton() {
           !readyToStart ? 'opacity-70' : ''
         } text-white rounded py-2 px-4`}
       >
-        Start
+        Let&apos;s go!
       </button>
     </div>
   )

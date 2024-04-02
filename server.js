@@ -1,12 +1,6 @@
 const { createServer } = require('node:http')
 const next = require('next')
 const { Server } = require('socket.io')
-// const { connect } = require('http2')
-// const { gameState } = require('@/data')
-// const { gameState, hasStarted } = require('./data')
-
-// import { gameState } from './data'
-
 const dev = process.env.NODE_ENV !== 'production'
 const hostname = 'localhost'
 const port = 3000
@@ -58,8 +52,8 @@ app.prepare().then(() => {
     const hasOpponent = playerIndex === 0 ? !!connections[1] : !!connections[0]
 
     // Tell the connecting client what player number they are
-    socket.emit('player-number', playerIndex + 1, hasOpponent)
-    // When a player reconnects, send them the latest game state stored on the server
+    socket.emit('player-number', playerIndex + 1, hasOpponent, isPlayerX)
+    // Ensure player has the latest game state stored on the server
     socket.emit(
       'restore-game-state',
       gameState,
@@ -87,9 +81,6 @@ app.prepare().then(() => {
     })
 
     socket.on('restart-game', () => {
-      // Tell the opponent the game has restarted
-      socket.broadcast.emit('game-restarted')
-
       gameState = {
         1: '',
         2: '',
@@ -102,7 +93,10 @@ app.prepare().then(() => {
         9: ''
       }
       hasStarted = false
-      currentPlayer = 1
+      currentId = null
+      isPlayerX = true
+
+      io.emit('game-restarted', gameState)
     })
 
     socket.on('updateCurrentTile', (tileId) => {

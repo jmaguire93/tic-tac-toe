@@ -25,7 +25,10 @@ export default function Home() {
     currentId,
     setCurrentId,
     gameState,
-    setGameState
+    setGameState,
+    hasFinished,
+    setHasFinished,
+    setWinningCombination
   } = useGameContextProvider()
 
   const [isConnected, setIsConnected] = useState(false)
@@ -61,15 +64,13 @@ export default function Home() {
   }, [])
 
   useEffect(() => {
-    function onPlayerNumberSelect(player: number, hasOpponent: boolean) {
+    function onPlayerNumberSelect(
+      player: number,
+      hasOpponent: boolean,
+      restoredIsPlayerX: boolean
+    ) {
       setPlayerId(player)
-
-      setCurrentId(isPlayerX ? 1 : 2)
-
-      // if first player, make the current player when they connect
-      if (player === 1) {
-        setCurrentId(player)
-      }
+      setCurrentId(restoredIsPlayerX ? 1 : 2)
 
       if (hasOpponent) {
         setOpponentId(player === 1 ? 2 : 1)
@@ -93,8 +94,13 @@ export default function Home() {
       setHasStarted(true)
     }
 
-    function onGameRestarted() {
-      window.location.reload()
+    function onGameRestarted(initialGameState: GameState) {
+      setGameState(initialGameState)
+      setHasStarted(false)
+      setHasFinished(false)
+      setCurrentId(1)
+      setIsPlayerX(true)
+      setWinningCombination(null)
     }
 
     function onGameFull() {
@@ -104,8 +110,7 @@ export default function Home() {
     function onRestoreGameState(
       restoredGameState: GameState,
       restoredHasStarted: boolean,
-      restoredIsPlayerX: boolean,
-      restoredCurrentId: number
+      restoredIsPlayerX: boolean
     ) {
       if (!compareObjects(restoredGameState, gameState)) {
         setGameState(restoredGameState)
@@ -117,10 +122,6 @@ export default function Home() {
 
       if (isPlayerX !== restoredIsPlayerX) {
         setIsPlayerX(restoredIsPlayerX)
-      }
-
-      if (currentId !== restoredCurrentId) {
-        setCurrentId(restoredCurrentId)
       }
     }
 
@@ -149,10 +150,13 @@ export default function Home() {
     isPlayerX,
     setCurrentId,
     setGameState,
+    setHasFinished,
     setHasStarted,
+    setIsPlayerX,
     setOpponentId,
     setPlayerId,
-    setReadyToStart
+    setReadyToStart,
+    setWinningCombination
   ])
 
   return (
@@ -165,41 +169,47 @@ export default function Home() {
         {hasStarted ? (
           <>
             <RestartButton />
-            <div className="text-center">
-              {currentId === playerId ? (
-                <div className="font-semibold">Your turn!</div>
-              ) : (
-                <div>{`Opponent's turn!`}</div>
-              )}
-            </div>
+            {!hasFinished ? (
+              <div className="text-center">
+                {currentId === playerId ? (
+                  <div className="font-semibold">Your turn!</div>
+                ) : (
+                  <div>{`Opponent's turn!`}</div>
+                )}
+              </div>
+            ) : null}
           </>
         ) : (
           <StartButton />
         )}
         <div className="text-center">
           {gameFull ? <div>Game is full.</div> : null}
-          <div className="flex justify-between text-sm">
-            {playerId ? (
-              <div
-                className={`${
-                  currentId === playerId ? 'font-bold' : ''
-                } inline`}
-              >
-                Player {playerId} ({playerId === 1 ? 'X' : 'O'})
-              </div>
-            ) : null}
-            {opponentId ? (
-              <div
-                className={`${
-                  currentId !== playerId ? 'font-bold' : ''
-                } inline`}
-              >
-                Player {opponentId} ({opponentId === 1 ? 'X' : 'O'})
-              </div>
-            ) : (
-              <>Waiting for opponent...</>
-            )}
-          </div>
+          {isConnected ? (
+            <div className="flex justify-between text-sm">
+              {playerId ? (
+                <div
+                  className={`${
+                    currentId === playerId ? 'font-bold' : ''
+                  } inline`}
+                >
+                  Player {playerId} ({playerId === 1 ? 'X' : 'O'})
+                </div>
+              ) : null}
+              {opponentId ? (
+                <div
+                  className={`${
+                    currentId !== playerId ? 'font-bold' : ''
+                  } inline`}
+                >
+                  Player {opponentId} ({opponentId === 1 ? 'X' : 'O'})
+                </div>
+              ) : (
+                <>Waiting for opponent...</>
+              )}
+            </div>
+          ) : (
+            <div>Connecting...</div>
+          )}
         </div>
         <div className="flex items-center justify-center">
           <Grid />
