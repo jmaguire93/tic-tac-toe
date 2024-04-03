@@ -29,11 +29,12 @@ export default function Home() {
     setGameState,
     hasFinished,
     setHasFinished,
-    setWinningCombination
+    setWinningCombination,
+    gameFull,
+    setGameFull
   } = useGameContextProvider()
 
   const { isConnected } = useSocketContextProvider()
-  const [gameFull, setGameFull] = useState<boolean>(false)
 
   useEffect(() => {
     const handlePlayerEvents = (
@@ -120,6 +121,7 @@ export default function Home() {
     hasStarted,
     isPlayerX,
     setCurrentId,
+    setGameFull,
     setGameState,
     setHasFinished,
     setHasStarted,

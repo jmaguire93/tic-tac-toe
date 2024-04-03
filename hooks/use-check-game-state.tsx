@@ -11,9 +11,7 @@ export default function useOnSelection() {
     gameState,
     setHasFinished,
     setMessage,
-    setWinningCombination,
-    currentId,
-    playerId
+    setWinningCombination
   } = useGameContextProvider()
 
   const checkGameState = useCallback(() => {

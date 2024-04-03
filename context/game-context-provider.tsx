@@ -28,6 +28,8 @@ type GameContextType = {
   setOpponentId: React.Dispatch<React.SetStateAction<number | null>>
   currentId: number | null
   setCurrentId: React.Dispatch<React.SetStateAction<number | null>>
+  gameFull: boolean
+  setGameFull: React.Dispatch<React.SetStateAction<boolean>>
 }
 
 type GameContextProviderProps = {
@@ -61,6 +63,7 @@ export default function GameContextProvider({
   const [playerId, setPlayerId] = useState<number | null>(null)
   const [opponentId, setOpponentId] = useState<number | null>(null)
   const [currentId, setCurrentId] = useState<number | null>(null)
+  const [gameFull, setGameFull] = useState<boolean>(false)
 
   return (
     <GameContext.Provider
@@ -86,7 +89,9 @@ export default function GameContextProvider({
         opponentId,
         setOpponentId,
         currentId,
-        setCurrentId
+        setCurrentId,
+        gameFull,
+        setGameFull
       }}
     >
       {children}
